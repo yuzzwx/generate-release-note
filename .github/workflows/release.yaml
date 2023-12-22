@@ -40,12 +40,12 @@ jobs:
           git config --global push.autoSetupRemote true
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
-          git fetch origin main:main
-          if [ $(git branch --show) != dev ]; then git fetch origin dev:dev; fi
+#          git fetch origin main:main
+#          if [ $(git branch --show) != dev ]; then git fetch origin dev:dev; fi
 
-      - run: python script/automerge.py -v
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#      - run: python script/automerge.py -v
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 #      - run: python script/git-pc-release.py ${{ inputs.build_type }} ${{ inputs.version }} -vp --message "${{ inputs.message }}"
 
