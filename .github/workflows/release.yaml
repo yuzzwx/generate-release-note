@@ -1,0 +1,68 @@
+name: Release Android Application
+run-name: Release for - ${{ inputs.build_type }} ${{ inputs.version }}
+on:
+  workflow_dispatch:
+    inputs:
+      build_type:
+        type: choice
+        description: Determines which channel will we use to release the app
+        required: true
+        options:
+          - beta
+          - all
+          - google
+      version:
+        type: choice
+        description: Which semantic version should be released
+        required: true
+        options:
+          - patch
+          - minor
+          - major
+      message:
+        type: string
+        description: 'Commit message of the release commit'
+        default: 'Sprint release'
+        required: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment: Release
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v4
+
+      - run: |
+          git config --global push.autoSetupRemote true
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git fetch origin master:master
+          if [ $(git branch --show) != dev ]; then git fetch origin dev:dev; fi
+
+      - run: python script/automerge.py -v
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+#      - run: python script/git-pc-release.py ${{ inputs.build_type }} ${{ inputs.version }} -vp --message "${{ inputs.message }}"
+
+      - name: Generate release notes
+        run: |
+          echo "RELEASE_NOTES<<EOF" >> $GITHUB_OUTPUT
+          echo "$(python build_release_notes.py)" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        id: notes
+
+      - name: Post to a Slack channel
+        id: slack
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          slack-message: |
+            ${{ steps.notes.outputs.RELEASE_NOTES }}
+        env:
+          SLACK_WEBHOOK_URL: "https://hooks.slack.com/services/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"
