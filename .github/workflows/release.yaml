@@ -59,10 +59,5 @@ jobs:
         id: notes
 
       - name: Post to a Slack channel
-        id: slack
-        uses: slackapi/slack-github-action@v1.24.0
-        with:
-          payload: ${{ steps.notes.outputs.RELEASE_NOTES }}
-        env:
-          SLACK_WEBHOOK_URL: "https://hooks.slack.com/services/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"
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+        run: |
+          curl -X POST -H 'Content-type: application/json' --data '${{steps.notes.outputs.RELEASE_NOTES}}' https://hooks.slack.com/services/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
