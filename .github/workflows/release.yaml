@@ -60,4 +60,4 @@ jobs:
 
       - name: Post to a Slack channel
         run: |
-          curl -X POST -H 'Content-type: application/json' --data '${{steps.notes.outputs.RELEASE_NOTES}}' https://hooks.slack.com/services/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
+          curl -X POST -H 'Content-type: application/json' --data '${{steps.notes.outputs.RELEASE_NOTES}}' https://hooks.slack.com/services/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
