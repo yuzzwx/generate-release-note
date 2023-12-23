@@ -21,7 +21,7 @@ def parse_clickup_task_id_from_branch_name(branch_name: str) -> str | None:
 
 def get_logs(branch: str, target_branch: str) -> str:
     return execute(
-        f'git log {target_branch}..{branch}',
+        f'git log {target_branch}...{branch}',
         read_result=True,
         dry_run=False,
         verbose=False
