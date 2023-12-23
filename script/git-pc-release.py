@@ -50,7 +50,7 @@ def get_new_version_number(version: str, verbose: bool):
 def pull_relevant_branches(dry_run: bool, verbose: bool):
     execute("git fetch origin main:main", read_result=True, dry_run=dry_run, verbose=verbose)
     execute("git pull origin dev", read_result=True, dry_run=dry_run, verbose=verbose)
-    execute("git fetch origin release-beta:release-beta", read_result=True, dry_run=dry_run, verbose=verbose)
+    # execute("git fetch origin release-beta:release-beta", read_result=True, dry_run=dry_run, verbose=verbose)
 
 
 def create_alpha_branch(alpha_version: str, dry_run: bool, verbose: bool):
