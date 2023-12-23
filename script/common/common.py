@@ -31,15 +31,17 @@ def get_current_highest_version_and_variant(verbose) -> (str, str):
         dry_run=False,
         verbose=verbose
     ).split("_")
-    _, variant_on_beta, version_on_beta = execute(
-        f'git log release-beta --grep "build_" -n 1 | grep -oh "build_.*"',
-        read_result=True,
-        dry_run=False,
-        verbose=verbose
-    ).split("_")
-    higher_version = get_higher_version(version_on_master, version_on_beta)
-    higher_variant = variant_on_master if higher_version == version_on_master else variant_on_beta
-    return higher_version, higher_variant
+    # _, variant_on_beta, version_on_beta = execute(
+    #     f'git log release-beta --grep "build_" -n 1 | grep -oh "build_.*"',
+    #     read_result=True,
+    #     dry_run=False,
+    #     verbose=verbose
+    # ).split("_")
+    # higher_version = get_higher_version(version_on_master, version_on_beta)
+    # higher_variant = variant_on_master if higher_version == version_on_master else variant_on_beta
+    # return higher_version, higher_variant
+
+    return version_on_master, variant_on_master
 
 
 def get_higher_version(version1: str, version2: str) -> str:
