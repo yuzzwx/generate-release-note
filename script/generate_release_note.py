@@ -50,7 +50,7 @@ def get_clickup_task_by_id(task_id: str) -> dict:
     )
 
 def get_latest_2_release_commit_hashes(branch):
-    command = f'git log {branch} --grep "build_" -n 2 | grep -oh "commit .*" | cut -d ' ' -f 2'
+    command = f'git log {branch} --grep "build_" -n 2 | grep -oh "commit .*" | cut -d " " -f 2'
     commits = execute(
         command,
         read_result=True,
