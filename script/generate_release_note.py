@@ -9,7 +9,7 @@ import requests
 import os
 
 from common.common import execute, get_current_highest_version_and_variant
-from build_release_notes import build_slack_message, Release, Task
+from build_release_notes import build_slack_message, Release, Task, DevMessage
 
 
 def parse_clickup_task_id_from_branch_name(branch_name: str) -> str | None:
@@ -190,7 +190,11 @@ def main():
             task_id,
             task["name"],
             task["url"],
-            []
+            [DevMessage(
+                "Test message",
+                "ace514",
+                "https://github.com/yuzzwx/generate-release-note/commit/ace5147df600d9df0b9c84f273d47dbbf74e6186"
+            )]
         ))
 
     release = Release(
