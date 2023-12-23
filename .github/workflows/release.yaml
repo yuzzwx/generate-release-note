@@ -53,11 +53,10 @@ jobs:
 
       - name: Create release commit and tag
         run: python script/git-pc-release.py ${{ inputs.build_type }} ${{ inputs.version }} -vp --message "${{ inputs.message }}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate release notes
         run: |
+          python script/generate_release_notes.py
           echo "RELEASE_NOTES<<EOF" >> $GITHUB_OUTPUT
           echo "$(python script/generate_release_notes.py)" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
