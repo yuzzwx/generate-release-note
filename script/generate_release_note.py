@@ -9,6 +9,7 @@ import requests
 import os
 
 from common.common import execute, get_current_highest_version_and_variant
+from build_release_notes import build_slack_message, Release, Task, DevMessage
 
 
 def parse_clickup_task_id_from_branch_name(branch_name: str) -> str | None:
@@ -20,7 +21,7 @@ def parse_clickup_task_id_from_branch_name(branch_name: str) -> str | None:
 
 def get_logs(branch: str, target_branch: str) -> str:
     return execute(
-        f'git log {target_branch}..{branch}',
+        f'git log {target_branch}...{branch}',
         read_result=True,
         dry_run=False,
         verbose=False
@@ -48,6 +49,18 @@ def get_clickup_task_by_id(task_id: str) -> dict:
         ).text
     )
 
+def get_latest_2_release_commit_hashes(branch):
+    command = f'git log {branch} --grep "build_" -n 2 | grep -oh "commit .*" | cut -d " " -f 2'
+    commits = execute(
+        command,
+        read_result=True,
+        dry_run=False,
+        verbose=False
+    ).splitlines()
+
+    return commits[0], commits[1]
+
+
 def get_nth_release_date_for_branch(branch, n, verbose):
     date_string = execute(
         f'git log {branch} --grep "build_" -n {n} --date=iso-strict | grep -oh "Date: .*"',
@@ -60,7 +73,7 @@ def get_nth_release_date_for_branch(branch, n, verbose):
 
 def get_latest_release_dates(verbose):
     releases_on_beta = [get_nth_release_date_for_branch("release-beta", it, verbose) for it in [1, 2]]
-    releases_on_master = [get_nth_release_date_for_branch("master", it, verbose) for it in [1, 2]]
+    releases_on_master = [get_nth_release_date_for_branch("main", it, verbose) for it in [1, 2]]
     release_dates = releases_on_master + releases_on_beta
     release_dates.sort(reverse=True)
     return release_dates
@@ -161,21 +174,34 @@ def get_args():
 #             print(entry)
 
 def main():
-    branch, target_branch = get_args()
-    logs = get_logs(branch, target_branch)
+    previous_release_commit_hash, latest_release_commit_hash = get_latest_2_release_commit_hashes("main")
+    logs = get_logs(latest_release_commit_hash, previous_release_commit_hash)
     task_ids = set()
-    task_id_from_branch_name = parse_clickup_task_id_from_branch_name(branch)
-    if task_id_from_branch_name:
-        task_ids.add(task_id_from_branch_name)
+    # task_id_from_branch_name = parse_clickup_task_id_from_branch_name(branch)
+    # if task_id_from_branch_name:
+    #     task_ids.add(task_id_from_branch_name)
     t = parse_clickup_task_ids(logs)
     task_ids.update(t)
 
+    tasks = []
     for task_id in task_ids:
         task = get_clickup_task_by_id(task_id)
-        print(task_id)
-        print(task["name"])
-        print(task["url"])
-        print("\n\n")
+        tasks.append(Task(
+            task_id,
+            task["name"],
+            task["url"],
+            [DevMessage(
+                "Test message",
+                "ace514",
+                "https://github.com/yuzzwx/generate-release-note/commit/ace5147df600d9df0b9c84f273d47dbbf74e6186"
+            )]
+        ))
+
+    release = Release(
+        get_current_highest_version_and_variant(False)[0],
+        tasks
+    )
+    print(build_slack_message(release))
 
 
 if __name__ == '__main__':

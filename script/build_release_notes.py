@@ -155,22 +155,22 @@ def build_slack_message(release: Release) -> str:
     """.replace("${blocks}", ",\n".join(blocks))
 
 
-release = Release(
-    "v1.0.0",
-    [
-        Task("1", "Task 1", "https://google.com",   []),
-        Task("2", "Task 2", "https://google.com",   [
-            DevMessage("Message 1", "abc123", "https://google.com"),
-            DevMessage("Message 2", "abc123", "https://google.com"),
-            DevMessage("Message 3", "abc123", "https://google.com"),
-        ]),
-        Task("3", "Task 3", "https://google.com",   [
-            DevMessage("Message 1", "abc123", "https://google.com"),
-        ]),
-    ]
-)
-
-print(build_slack_message(release))
+# release = Release(
+#     "v1.0.0",
+#     [
+#         Task("1", "Task 1", "https://google.com",   []),
+#         Task("2", "Task 2", "https://google.com",   [
+#             DevMessage("Message 1", "abc123", "https://google.com"),
+#             DevMessage("Message 2", "abc123", "https://google.com"),
+#             DevMessage("Message 3", "abc123", "https://google.com"),
+#         ]),
+#         Task("3", "Task 3", "https://google.com",   [
+#             DevMessage("Message 1", "abc123", "https://google.com"),
+#         ]),
+#     ]
+# )
+#
+# print(build_slack_message(release))
 
 # command = """
 # curl -X POST -H 'Content-type: application/json' --data '
