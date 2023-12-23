@@ -5,7 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c2c2a787-f680-4adf-869c-0d6abc6ce42e" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/script/git-pc-release.py" beforeDir="false" afterPath="$PROJECT_DIR$/script/git-pc-release.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/script/build_release_notes.py" beforeDir="false" afterPath="$PROJECT_DIR$/script/build_release_notes.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
