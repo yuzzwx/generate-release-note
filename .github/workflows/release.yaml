@@ -36,23 +36,28 @@ jobs:
 
       - uses: actions/setup-python@v4
 
-      - run: |
+      - name: Setup Git config
+        run: |
           git config --global push.autoSetupRemote true
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
-#          git fetch origin main:main
-#          if [ $(git branch --show) != dev ]; then git fetch origin dev:dev; fi
 
-#      - run: python script/automerge.py -v
+#      - name: Auto merge eligible PRs
 #        env:
 #          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        run: |
+#          git fetch origin master:master
+#          git fetch origin release-beta:release-beta
+#          if [ $(git branch --show) != dev ]; then git fetch origin dev:dev; fi
+#          python script/automerge.py -v
 
-#      - run: python script/git-pc-release.py ${{ inputs.build_type }} ${{ inputs.version }} -vp --message "${{ inputs.message }}"
+      - name: Create release commit and tag
+        run: python script/git-pc-release.py ${{ inputs.build_type }} ${{ inputs.version }} -vp --message "${{ inputs.message }}"
 
       - name: Generate release notes
         run: |
           echo "RELEASE_NOTES<<EOF" >> $GITHUB_OUTPUT
-          echo "$(python build_release_notes.py)" >> $GITHUB_OUTPUT
+          echo "$(python script/generate_release_notes.py)" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
