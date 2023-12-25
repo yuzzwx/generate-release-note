@@ -19,6 +19,7 @@ def parse_clickup_task_id_from_branch_name(branch_name: str) -> str | None:
     else:
         return None
 
+
 def get_logs(branch: str, target_branch: str) -> str:
     return execute(
         f'git log {target_branch}...{branch}',
@@ -27,13 +28,19 @@ def get_logs(branch: str, target_branch: str) -> str:
         verbose=False
     )
 
-def parse_clickup_task_ids(logs: str) -> list[str]:
-    task_ids = []
-    for line in logs.splitlines():
-        task_id = line.strip()
-        if task_id.startswith("#"):
-            task_ids.append(task_id[1:])
-    return task_ids
+
+def parse_clickup_task_ids(logs: str) -> list[tuple[str, str | None]]:
+    results = []
+    pattern = re.compile(r'#(\w+)(?:\s*\{\s*([^}]*)\s*\})?')
+
+    matches = pattern.findall(logs)
+    for match in matches:
+        task = match[0]
+        dev_message = match[1].strip() if match[1] else None
+        results.append((task, dev_message))
+
+    return results
+
 
 def get_clickup_token() -> str:
     return os.environ["CLICKUP_TOKEN"]
