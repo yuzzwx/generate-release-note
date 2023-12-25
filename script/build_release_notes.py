@@ -87,8 +87,8 @@ def dev_message_element(dev_message: DevMessage) -> str:
     }
     """
             .replace("${dev_message}", dev_message.message)
-            .replace("${url}", dev_message.url)
-            .replace("${commit_hash}", dev_message.commit_hash))
+            .replace("${url}", "https://github.com/")
+            .replace("${commit_hash}", "test123"))
 
 
 def task_element(task: Task) -> str:
