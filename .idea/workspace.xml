@@ -5,7 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c2c2a787-f680-4adf-869c-0d6abc6ce42e" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/script/generate_release_note.py" beforeDir="false" afterPath="$PROJECT_DIR$/script/generate_release_note.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/script/build_release_notes.py" beforeDir="false" afterPath="$PROJECT_DIR$/script/build_release_notes.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -32,6 +32,7 @@
   </component>
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,

@@ -19,6 +19,7 @@ def parse_clickup_task_id_from_branch_name(branch_name: str) -> str | None:
     else:
         return None
 
+
 def get_logs(branch: str, target_branch: str) -> str:
     return execute(
         f'git log {target_branch}...{branch}',
@@ -27,13 +28,22 @@ def get_logs(branch: str, target_branch: str) -> str:
         verbose=False
     )
 
-def parse_clickup_task_ids(logs: str) -> list[str]:
-    task_ids = []
-    for line in logs.splitlines():
-        task_id = line.strip()
-        if task_id.startswith("#"):
-            task_ids.append(task_id[1:])
-    return task_ids
+
+def parse_task_id_and_dev_message(logs: str) -> dict[str, list[str]]:
+    results = {}
+    pattern = re.compile(r'#(\w+)(?:\s*\{\s*([^}]*)\s*\})?')
+
+    matches = pattern.findall(logs)
+    for match in matches:
+        task = match[0]
+        dev_message = match[1].strip() if match[1] else None
+        if task not in results:
+            results[task] = []
+        if dev_message:
+            results[task].append(dev_message)
+
+    return results
+
 
 def get_clickup_token() -> str:
     return os.environ["CLICKUP_TOKEN"]
@@ -176,25 +186,19 @@ def get_args():
 def main():
     previous_release_commit_hash, latest_release_commit_hash = get_latest_2_release_commit_hashes("main")
     logs = get_logs(latest_release_commit_hash, previous_release_commit_hash)
-    task_ids = set()
     # task_id_from_branch_name = parse_clickup_task_id_from_branch_name(branch)
     # if task_id_from_branch_name:
     #     task_ids.add(task_id_from_branch_name)
-    t = parse_clickup_task_ids(logs)
-    task_ids.update(t)
 
     tasks = []
-    for task_id in task_ids:
+    task_message_dict = parse_task_id_and_dev_message(logs)
+    for task_id in task_message_dict.keys():
         task = get_clickup_task_by_id(task_id)
         tasks.append(Task(
             task_id,
             task["name"],
             task["url"],
-            [DevMessage(
-                "Test message",
-                "ace514",
-                "https://github.com/yuzzwx/generate-release-note/commit/ace5147df600d9df0b9c84f273d47dbbf74e6186"
-            )]
+            [DevMessage(message) for message in task_message_dict[task_id]]
         ))
 
     release = Release(
