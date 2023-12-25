@@ -22,22 +22,25 @@ def parse_clickup_task_id_from_branch_name(branch_name: str) -> str | None:
 
 def get_logs(branch: str, target_branch: str) -> str:
     return execute(
-        f'git log {target_branch}..{branch}',
+        f'git log {target_branch}...{branch}',
         read_result=True,
         dry_run=False,
         verbose=False
     )
 
 
-def parse_task_id_and_dev_message(logs: str) -> list[tuple[str, str | None]]:
-    results = []
-    pattern = re.compile(r'#(\w+)(?:\s*\{\s*([^}]*)\s*)?')
+def parse_task_id_and_dev_message(logs: str) -> dict[str, list[str]]:
+    results = {}
+    pattern = re.compile(r'#(\w+)(?:\s*\{\s*([^}]*)\s*\})?')
 
     matches = pattern.findall(logs)
     for match in matches:
         task = match[0]
         dev_message = match[1].strip() if match[1] else None
-        results.append((task, dev_message))
+        if task not in results:
+            results[task] = []
+        if dev_message:
+            results[task].append(dev_message)
 
     return results
 
@@ -183,25 +186,19 @@ def get_args():
 def main():
     previous_release_commit_hash, latest_release_commit_hash = get_latest_2_release_commit_hashes("main")
     logs = get_logs(latest_release_commit_hash, previous_release_commit_hash)
-    task_message_map = {}
     # task_id_from_branch_name = parse_clickup_task_id_from_branch_name(branch)
     # if task_id_from_branch_name:
     #     task_ids.add(task_id_from_branch_name)
-    t = parse_task_id_and_dev_message(logs)
-    for task_id, dev_message in t:
-        messages = task_message_map[task_id]
-        if messages is None:
-            messages = []
-        messages.append(dev_message)
 
     tasks = []
-    for task_id, messages in task_message_map:
+    task_message_dict = parse_task_id_and_dev_message(logs)
+    for task_id in task_message_dict.keys():
         task = get_clickup_task_by_id(task_id)
         tasks.append(Task(
             task_id,
             task["name"],
             task["url"],
-            [DevMessage(message) for message in messages]
+            [DevMessage(message) for message in task_message_dict[task_id]]
         ))
 
     release = Release(
