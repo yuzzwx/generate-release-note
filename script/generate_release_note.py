@@ -183,25 +183,25 @@ def get_args():
 def main():
     previous_release_commit_hash, latest_release_commit_hash = get_latest_2_release_commit_hashes("main")
     logs = get_logs(latest_release_commit_hash, previous_release_commit_hash)
-    task_ids = set()
+    task_message_map = {}
     # task_id_from_branch_name = parse_clickup_task_id_from_branch_name(branch)
     # if task_id_from_branch_name:
     #     task_ids.add(task_id_from_branch_name)
     t = parse_task_id_and_dev_message(logs)
-    task_ids.update(t)
+    for task_id, dev_message in t:
+        messages = task_message_map[task_id]
+        if messages is None:
+            messages = []
+        messages.append(dev_message)
 
     tasks = []
-    for task_id in task_ids:
+    for task_id, messages in task_message_map:
         task = get_clickup_task_by_id(task_id)
         tasks.append(Task(
             task_id,
             task["name"],
             task["url"],
-            [DevMessage(
-                "Test message",
-                "ace514",
-                "https://github.com/yuzzwx/generate-release-note/commit/ace5147df600d9df0b9c84f273d47dbbf74e6186"
-            )]
+            [DevMessage(message) for message in messages]
         ))
 
     release = Release(

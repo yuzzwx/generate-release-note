@@ -6,10 +6,10 @@ class DevMessage:
     commit_hash: str
     url: str
 
-    def __init__(self, message: str, commit_hash: str, url: str):
+    def __init__(self, message: str):
         self.message = message
-        self.commit_hash = commit_hash
-        self.url = url
+        # self.commit_hash = commit_hash
+        # self.url = url
 
 
 class Task:
