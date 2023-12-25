@@ -29,9 +29,9 @@ def get_logs(branch: str, target_branch: str) -> str:
     )
 
 
-def parse_clickup_task_ids(logs: str) -> list[tuple[str, str | None]]:
+def parse_task_id_and_dev_message(logs: str) -> list[tuple[str, str | None]]:
     results = []
-    pattern = re.compile(r'#(\w+)(?:\s*\{\s*([^}]*)\s*\})?')
+    pattern = re.compile(r'#(\w+)(?:\s*\{\s*([^}]*)\s*)?')
 
     matches = pattern.findall(logs)
     for match in matches:
@@ -187,7 +187,7 @@ def main():
     # task_id_from_branch_name = parse_clickup_task_id_from_branch_name(branch)
     # if task_id_from_branch_name:
     #     task_ids.add(task_id_from_branch_name)
-    t = parse_clickup_task_ids(logs)
+    t = parse_task_id_and_dev_message(logs)
     task_ids.update(t)
 
     tasks = []
