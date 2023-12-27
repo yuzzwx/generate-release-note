@@ -31,7 +31,7 @@ def get_logs(branch: str, target_branch: str) -> str:
 
 def parse_task_id_and_dev_message(logs: str) -> dict[str, list[str]]:
     results = {}
-    pattern = re.compile(r'#(\w+)(?:\s*\{\s*([^}]*)\s*\})?')
+    pattern = re.compile(r'#(\w+)(?:\s*\{\s*([^}]*)\s*})?')
 
     matches = pattern.findall(logs)
     for match in matches:
