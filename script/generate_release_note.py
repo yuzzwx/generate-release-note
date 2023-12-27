@@ -184,7 +184,7 @@ def get_args():
 #             print(entry)
 
 def main():
-    previous_release_commit_hash, latest_release_commit_hash = get_latest_2_release_commit_hashes("main")
+    latest_release_commit_hash, previous_release_commit_hash = get_latest_2_release_commit_hashes("main")
     logs = get_logs(latest_release_commit_hash, previous_release_commit_hash)
     # task_id_from_branch_name = parse_clickup_task_id_from_branch_name(branch)
     # if task_id_from_branch_name:
