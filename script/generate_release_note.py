@@ -57,7 +57,6 @@ def get_clickup_task_by_id(task_id: str) -> dict | None:
         }
     )
     if resp.status_code != 200:
-        print(f"Error getting task {task_id}")
         return None
 
     return json.loads(resp.text)
