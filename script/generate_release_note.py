@@ -196,7 +196,7 @@ def main():
         task = get_clickup_task_by_id(task_id)
         tasks.append(Task(
             task_id,
-            task["name"],
+            task["title"],
             task["url"],
             [DevMessage(message) for message in task_message_dict[task_id]]
         ))
