@@ -49,15 +49,18 @@ def get_clickup_token() -> str:
     return os.environ["CLICKUP_TOKEN"]
 
 
-def get_clickup_task_by_id(task_id: str) -> dict:
-    return json.loads(
-        requests.get(
-            f'https://api.clickup.com/api/v2/task/{task_id}',
-            headers={
-                "Authorization": get_clickup_token()
-            }
-        ).text
+def get_clickup_task_by_id(task_id: str) -> dict | None:
+    resp = requests.get(
+        f'https://api.clickup.com/api/v2/task/{task_id}',
+        headers={
+            "Authorization": get_clickup_token()
+        }
     )
+    if resp.status_code != 200:
+        print(f"Error getting task {task_id}")
+        return None
+
+    return json.loads(resp.text)
 
 def get_latest_2_release_commit_hashes(branch):
     command = f'git log {branch} --grep "build_" -n 2 | grep -oh "commit .*" | cut -d " " -f 2'
@@ -194,12 +197,13 @@ def main():
     task_message_dict = parse_task_id_and_dev_message(logs)
     for task_id in task_message_dict.keys():
         task = get_clickup_task_by_id(task_id)
-        tasks.append(Task(
-            task_id,
-            task["title"],
-            task["url"],
-            [DevMessage(message) for message in task_message_dict[task_id]]
-        ))
+        if task:
+            tasks.append(Task(
+                task_id,
+                task["name"],
+                task["url"],
+                [DevMessage(message) for message in task_message_dict[task_id]]
+            ))
 
     release = Release(
         get_current_highest_version_and_variant(False)[0],
