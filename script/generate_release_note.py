@@ -31,7 +31,7 @@ def get_logs(branch: str, target_branch: str) -> str:
 
 def parse_task_id_and_dev_message(logs: str) -> dict[str, list[str]]:
     results = {}
-    pattern = re.compile(r'#(\w+)(?:\s*\{\s*([^}]*)\s*\})?')
+    pattern = re.compile(r'#(\w+)(?:\s*\{\s*([^}]*)\s*})?')
 
     matches = pattern.findall(logs)
     for match in matches:
@@ -49,15 +49,17 @@ def get_clickup_token() -> str:
     return os.environ["CLICKUP_TOKEN"]
 
 
-def get_clickup_task_by_id(task_id: str) -> dict:
-    return json.loads(
-        requests.get(
-            f'https://api.clickup.com/api/v2/task/{task_id}',
-            headers={
-                "Authorization": get_clickup_token()
-            }
-        ).text
+def get_clickup_task_by_id(task_id: str) -> dict | None:
+    resp = requests.get(
+        f'https://api.clickup.com/api/v2/task/{task_id}',
+        headers={
+            "Authorization": get_clickup_token()
+        }
     )
+    if resp.status_code != 200:
+        return None
+
+    return json.loads(resp.text)
 
 def get_latest_2_release_commit_hashes(branch):
     command = f'git log {branch} --grep "build_" -n 2 | grep -oh "commit .*" | cut -d " " -f 2'
@@ -184,7 +186,7 @@ def get_args():
 #             print(entry)
 
 def main():
-    previous_release_commit_hash, latest_release_commit_hash = get_latest_2_release_commit_hashes("main")
+    latest_release_commit_hash, previous_release_commit_hash = get_latest_2_release_commit_hashes("main")
     logs = get_logs(latest_release_commit_hash, previous_release_commit_hash)
     # task_id_from_branch_name = parse_clickup_task_id_from_branch_name(branch)
     # if task_id_from_branch_name:
@@ -194,12 +196,13 @@ def main():
     task_message_dict = parse_task_id_and_dev_message(logs)
     for task_id in task_message_dict.keys():
         task = get_clickup_task_by_id(task_id)
-        tasks.append(Task(
-            task_id,
-            task["name"],
-            task["url"],
-            [DevMessage(message) for message in task_message_dict[task_id]]
-        ))
+        if task:
+            tasks.append(Task(
+                task_id,
+                task["name"],
+                task["url"],
+                [DevMessage(message) for message in task_message_dict[task_id]]
+            ))
 
     release = Release(
         get_current_highest_version_and_variant(False)[0],
