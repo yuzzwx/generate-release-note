@@ -1,0 +1,20 @@
+on:
+  pull_request:
+    types: [ opened, synchronize ]
+
+jobs:
+  link-task:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Link task from branch name
+        id: link-task
+        run: |
+          TASK_ID=$(python script/parse_task_id.py ${{ github.event.pull_request.head.ref }})
+          echo TASK_ID=$TASK_ID >> $GITHUB_OUTPUT
+
+      - name: Comment task ID on PR
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            Link to: CU-${{ steps.link-task.outputs.TASK_ID }}
