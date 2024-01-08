@@ -43,7 +43,7 @@ jobs:
         run: |
           TASK_ID_FROM_BRANCH="${{ steps.task-id-from-branch.outputs.TASK_ID }}"
           TASK_IDS_FROM_COMMENT="${{ steps.task-id-from-comment.outputs.TASK_IDS }}"
-          UPDATED_TASK_IDS=$(echo python script/update_task_status.py $TARGET_STATUS $TASK_ID_FROM_BRANCH $TASK_IDS_FROM_COMMENT)
+          UPDATED_TASK_IDS=$(python script/update_task_status.py $TARGET_STATUS $TASK_ID_FROM_BRANCH $TASK_IDS_FROM_COMMENT)
           
           echo ::set-output name=UPDATED_TASK_IDS::UPDATED_TASK_IDS
 
