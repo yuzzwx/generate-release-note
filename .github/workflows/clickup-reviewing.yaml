@@ -93,5 +93,4 @@ jobs:
         with:
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
           body: |
-            Linked tasks:
             ${{ steps.create-comment.outputs.RESULT }}
