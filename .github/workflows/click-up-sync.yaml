@@ -5,10 +5,10 @@ on:
 jobs:
   click-up-sync:
     runs-on: ubuntu-latest
+    if: github.event.comment.user.name == 'github-actions[bot]'
     steps:
       - name: Parse task ID from comment
         id: parse-task-id
-        if: github.actor == 'github-actions[bot]'
         run: |
           COMMENT_BODY=${{ github.event.comment.body }}
           TASK_IDS=$(python script/parse_bot_comment.py $COMMENT_BODY)
