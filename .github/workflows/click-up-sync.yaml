@@ -17,6 +17,7 @@ jobs:
       - uses: actions/setup-python@v4
 
       - name: Parse task id from branch name
+        if: github.event_name == 'pull_request'
         id: task-id-from-branch
         run: |
           BRANCH_NAME=${{ github.event.pull_request.head.ref }}
