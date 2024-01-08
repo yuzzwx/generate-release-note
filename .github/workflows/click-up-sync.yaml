@@ -44,7 +44,7 @@ jobs:
           TASK_IDS_FROM_COMMENT="${{ steps.task-id-from-comment.outputs.TASK_IDS }}"
           UPDATED_TASK_IDS=$(python script/update_task_status.py $TARGET_STATUS $TASK_ID_FROM_BRANCH $TASK_IDS_FROM_COMMENT)
           
-          echo ::set-output name=UPDATED_TASK_IDS::UPDATED_TASK_IDS
+          echo ::set-output name=UPDATED_TASK_IDS::$UPDATED_TASK_IDS
 
 #      - name: Find previous comment
 #        uses: peter-evans/find-comment@v1
@@ -63,7 +63,7 @@ jobs:
         id: create-comment
         run: |
           RESULT=$(python script/list_tasks_in_md.py ${{ steps.update-task-status.outputs.UPDATED_TASK_IDS }})
-          echo ::set-output name=RESULT::RESULT
+          echo ::set-output name=RESULT::$RESULT
 
       - name: Comment on PR
         uses: peter-evans/create-or-update-comment@v3
