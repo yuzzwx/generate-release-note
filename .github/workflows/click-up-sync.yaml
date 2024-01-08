@@ -4,6 +4,8 @@ on:
   issue_comment:
     types: [ created, edited ]
 
+# TODO check all criteria
+
 jobs:
   click-up-sync:
     runs-on: ubuntu-latest
