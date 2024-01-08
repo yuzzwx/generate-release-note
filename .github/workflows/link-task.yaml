@@ -29,8 +29,17 @@ jobs:
           echo TASK_ID=$TASK_ID >> $GITHUB_OUTPUT
 
       - name: Comment task ID on PR
+        if: github.event_name == 'pull_request'
         uses: peter-evans/create-or-update-comment@v3
         with:
           issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            Link to `CU-${{ steps.link-task.outputs.TASK_ID }}`
+
+      - name: Comment task ID on PR
+        if: github.event_name == 'issue_comment' && github.event.issue.pull_request
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          issue-number: ${{ github.event.issue.number }}
           body: |
             Link to `CU-${{ steps.link-task.outputs.TASK_ID }}`
