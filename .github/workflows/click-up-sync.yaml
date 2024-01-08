@@ -45,3 +45,10 @@ jobs:
 
         env:
           CLICKUP_TOKEN: ${{ secrets.CLICKUP_TOKEN }}
+
+      - name: Comment on PR
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            Task ${{ steps.task-id-from-branch.outputs.TASK_ID || steps.task-id-from-comment.outputs.TASK_ID }} is now ON-HOLD
