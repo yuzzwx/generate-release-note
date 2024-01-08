@@ -18,20 +18,20 @@ jobs:
         id: link-task
         if: github.event_name == 'pull_request'
         run: |
-          TASK_ID_FROM_BRANCH=$(python script/parse_task_id.py ${{ github.event.pull_request.head.ref }})
-          TASK_ID_FROM_COMMENT=$(python script/parse_task_id.py ${{ github.event.comment.body }})
-          if [ -z "$TASK_ID_FROM_BRANCH" ]; then
-              echo "No task ID found in branch name"
-              if [ -z "$TASK_ID_FROM_COMMENT" ]; then
-              echo "No task ID found in comment"
-              exit 1
-              else
-              echo "Found task ID $TASK_ID_FROM_COMMENT in comment"
-              echo "::set-output name=TASK_ID::$TASK_ID_FROM_COMMENT"
-              fi
+          BRANCH_NAME=${{ github.event.pull_request.head.ref }}
+          COMMENT_BODY=${{ github.event.comment.body }}
+          if [ $BRANCH_NAME ]; then
+              TASK_ID=$(python script/parse_task_id.py $BRANCH_NAME)
+          elif [ $COMMENT_BODY ]; then
+              TASK_ID=$(python script/parse_task_id.py $COMMENT_BODY)
+          fi
+          
+          if [ $TASK_ID ]; then
+              echo "Found task ID $TASK_ID in branch name"
+              echo "::set-output name=TASK_ID::$TASK_ID"
           else
-              echo "Found task ID $TASK_ID_FROM_BRANCH in branch name"
-              echo "::set-output name=TASK_ID::$TASK_ID_FROM_BRANCH"
+              echo "No task ID found in branch name"
+              exit 1
           fi
 
       - name: Comment task ID on PR
