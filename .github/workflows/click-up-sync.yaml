@@ -1,4 +1,6 @@
 on:
+  pull_request:
+    types: [ opened, synchronize ]
   issue_comment:
     types: [ created, edited ]
 
@@ -6,33 +8,40 @@ jobs:
   click-up-sync:
     runs-on: ubuntu-latest
     steps:
-      - name: test
-        run: |
-          echo ${{ github.event.comment.user.login }}
-          echo ${{ github.event.comment.sender.login }}
-          echo ${{ github.event.comment.body }}
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
-#          COMMENT_BODY=${{ github.event.comment.body }}
-#          TASK_IDS=$(python script/parse_bot_comment.py $COMMENT_BODY)
-#          if [ $TASK_IDS ]; then
-#              echo "Found task ID $TASK_IDS in comment"
-#              echo "::set-output name=TASK_IDS::$TASK_IDS"
-#          else
-#              echo "No task ID found in comment"
-#              exit 0
-#          fi
-#
-#      - name: Sync task status
-#        run: |
-#          TASK_IDS=${{ steps.parse-task-id.outputs.TASK_IDS }}
-#
-#          while IFS= read -r task; do
-#              curl -i -X PUT \
-#              "https://api.clickup.com/api/v2/task/$task" \
-#              -H "Authorization: $CLICKUP_TOKEN" \
-#              -H 'Content-Type: application/json' \
-#              -d '{ "status": "ON-HOLD" }'
-#          done <<< "$TASK_IDS"
-#
-#        env:
-#          CLICKUP_TOKEN: ${{ secrets.CLICKUP_TOKEN }}
+      - uses: actions/setup-python@v4
+
+      - name: Parse task id from branch name
+        id: task-id-from-branch
+        run: |
+          BRANCH_NAME=${{ github.event.pull_request.head.ref }}
+          TASK_ID=$(python script/parse_task_id.py $BRANCH_NAME)
+          
+          echo ::set-output name=TASK_ID::$TASK_ID
+
+      - name: Parse task id from comment
+        id: task-id-from-comment
+        run: |
+          COMMENT_BODY=${{ github.event.comment.body }}
+          TASK_ID=$(echo "$COMMENT_BODY" | sed "s/^CU-//g")
+          echo ::set-output name=TASK_ID::$TASK_ID
+
+      - name: Sync task status
+        run: |
+          TASK_ID=${{ steps.task-id-from-branch.outputs.TASK_ID || steps.task-id-from-comment.outputs.TASK_ID }}
+          if [ $TASK_ID ]; then
+              curl -i -X PUT \
+              "https://api.clickup.com/api/v2/task/$TASK_ID" \
+              -H "Authorization: $CLICKUP_TOKEN" \
+              -H 'Content-Type: application/json' \
+              -d '{ "status": "ON-HOLD" }'
+          else
+              echo "No task ID found in branch name or comment"
+              exit 0
+          fi
+
+        env:
+          CLICKUP_TOKEN: ${{ secrets.CLICKUP_TOKEN }}
