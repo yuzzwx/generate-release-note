@@ -60,6 +60,7 @@ jobs:
 #          comment-id: ${{ steps.find-comment.outputs.comment-id }}
 
       - name: Create comment
+        id: create-comment
         run: |
           RESULT=$(python script/list_tasks_in_md.py ${{ steps.update-task-status.outputs.UPDATED_TASK_IDS }})
           echo ::set-output name=RESULT::RESULT
