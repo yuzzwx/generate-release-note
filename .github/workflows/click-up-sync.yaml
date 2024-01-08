@@ -10,6 +10,8 @@ jobs:
       - name: Parse task ID from comment
         id: parse-task-id
         run: |
+          echo ${{ github.event.comment.user.name }}
+          
           COMMENT_BODY=${{ github.event.comment.body }}
           TASK_IDS=$(python script/parse_bot_comment.py $COMMENT_BODY)
           if [ $TASK_IDS ]; then
