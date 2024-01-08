@@ -5,6 +5,8 @@ on:
     types: [ created, edited ]
 
 # TODO check all criteria
+env:
+  TARGET_STATUS: 'ON-HOLD'
 
 jobs:
   click-up-sync:
@@ -27,31 +29,46 @@ jobs:
 
       - name: Parse task id from comment
         id: task-id-from-comment
+        if: ${{ github.event.comment.body.startsWith('/link') }}
         run: |
-          COMMENT_BODY=${{ github.event.comment.body }}
-          TASK_ID=$(echo "$COMMENT_BODY" | sed "s/^CU-//g")
-          echo ::set-output name=TASK_ID::$TASK_ID
+          TASK_IDS_IN_RAW=$(echo ${{ github.event.comment.body }} | sed 's/\/link //g')
+          TASK_IDS=$(python script/parse_task_id.py $TASK_IDS_IN_RAW)
+          
+          echo ::set-output name=TASK_IDS::$TASK_IDS
 
-      - name: Sync task status
-        run: |
-          TASK_ID=${{ steps.task-id-from-branch.outputs.TASK_ID || steps.task-id-from-comment.outputs.TASK_ID }}
-          if [ $TASK_ID ]; then
-              curl -i -X PUT \
-              "https://api.clickup.com/api/v2/task/$TASK_ID" \
-              -H "Authorization: $CLICKUP_TOKEN" \
-              -H 'Content-Type: application/json' \
-              -d '{ "status": "ON-HOLD" }'
-          else
-              echo "No task ID found in branch name or comment"
-              exit 0
-          fi
-
+      - name: Update task status
+        id: update-task-status
         env:
           CLICKUP_TOKEN: ${{ secrets.CLICKUP_TOKEN }}
+        run: |
+          TASK_ID_FROM_BRANCH=${{ steps.task-id-from-branch.outputs.TASK_ID }}
+          TASK_IDS_FROM_COMMENT=${{ steps.task-id-from-comment.outputs.TASK_IDS }}
+          UPDATED_TASK_IDS=$(echo python script/update_task_status.py $TARGET_STATUS $TASK_ID_FROM_BRANCH $TASK_IDS_FROM_COMMENT)
+          
+          echo ::set-output name=UPDATED_TASK_IDS::UPDATED_TASK_IDS
+
+#      - name: Find previous comment
+#        uses: peter-evans/find-comment@v1
+#        id: find-comment
+#        with:
+#          issue-number: ${{ github.event.issue.number }}
+#          comment-author: 'github-actions[bot]'
+#
+#      - name: Remove previous comment
+#        if: steps.find-comment.outputs.comment-id != ''
+#        uses: peter-evans/delete-comment@v1
+#        with:
+#          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+
+      - name: Create comment
+        run: |
+          RESULT=$(python script/list_tasks_in_md.py ${{ steps.update-task-status.outputs.UPDATED_TASK_IDS }})
+          echo ::set-output name=RESULT::RESULT
 
       - name: Comment on PR
         uses: peter-evans/create-or-update-comment@v3
         with:
           issue-number: ${{ github.event.pull_request.number || github.event.issue.number }}
           body: |
-            Task ${{ steps.task-id-from-branch.outputs.TASK_ID || steps.task-id-from-comment.outputs.TASK_ID }} is now ON-HOLD
+            The following tasks are updated to `${{ env.TARGET_STATUS }}`:
+            ${{ steps.create-comment.outputs.RESULT }}

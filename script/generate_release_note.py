@@ -5,11 +5,10 @@ import argparse
 import json
 import re
 from datetime import datetime
-import requests
-import os
 
 from common.common import execute, get_current_highest_version_and_variant
 from build_release_notes import build_slack_message, Release, Task, DevMessage
+from api.clickup_api import get_clickup_task
 
 
 def parse_clickup_task_id_from_branch_name(branch_name: str) -> str | None:
@@ -44,22 +43,6 @@ def parse_task_id_and_dev_message(logs: str) -> dict[str, list[str]]:
 
     return results
 
-
-def get_clickup_token() -> str:
-    return os.environ["CLICKUP_TOKEN"]
-
-
-def get_clickup_task_by_id(task_id: str) -> dict | None:
-    resp = requests.get(
-        f'https://api.clickup.com/api/v2/task/{task_id}',
-        headers={
-            "Authorization": get_clickup_token()
-        }
-    )
-    if resp.status_code != 200:
-        return None
-
-    return json.loads(resp.text)
 
 def get_latest_2_release_commit_hashes(branch):
     command = f'git log {branch} --grep "build_" -n 2 | grep -oh "commit .*" | cut -d " " -f 2'
@@ -195,7 +178,7 @@ def main():
     tasks = []
     task_message_dict = parse_task_id_and_dev_message(logs)
     for task_id in task_message_dict.keys():
-        task = get_clickup_task_by_id(task_id)
+        task = get_clickup_task(task_id)
         if task:
             tasks.append(Task(
                 task_id,
