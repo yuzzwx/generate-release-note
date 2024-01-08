@@ -8,7 +8,6 @@ jobs:
     steps:
       - name: Parse task ID from comment
         id: parse-task-id
-        # check comment from github actions bot
         if: github.actor == 'github-actions[bot]'
         run: |
           COMMENT_BODY=${{ github.event.comment.body }}
@@ -25,16 +24,13 @@ jobs:
         run: |
           TASK_IDS=${{ steps.parse-task-id.outputs.TASK_IDS }}
           
-          IFS=$'\n' read -ra lines <<< "$TASK_IDS"
-          for task in "${lines[@]}"; do
-            curl -i -X PUT \
-              "https://api.clickup.com/api/v2/task/$task? \
-              -H 'Authorization: $CLICKUP_TOKEN' \
+          while IFS= read -r task; do
+              curl -i -X PUT \
+              "https://api.clickup.com/api/v2/task/$task" \
+              -H "Authorization: $CLICKUP_TOKEN" \
               -H 'Content-Type: application/json' \
-              -d '{
-              "status": "ON-HOLD"
-            }'
-          done
+              -d '{ "status": "ON-HOLD" }'
+          done <<< "$TASK_IDS"
 
         env:
           CLICKUP_TOKEN: ${{ secrets.CLICKUP_TOKEN }}
