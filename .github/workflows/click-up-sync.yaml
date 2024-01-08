@@ -71,4 +71,4 @@ jobs:
           issue-number: ${{ github.event.pull_request.number || github.event.issue.number }}
           body: |
             The following tasks are updated to `${{ env.TARGET_STATUS }}`:
-            "${{ steps.create-comment.outputs.RESULT }}"
+            ${{ steps.create-comment.outputs.RESULT }}
