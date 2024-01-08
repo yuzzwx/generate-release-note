@@ -31,6 +31,6 @@ jobs:
       - name: Comment task ID on PR
         uses: peter-evans/create-or-update-comment@v3
         with:
-          issue-number: ${{ github.event.pull_request.number }}
+          issue-number: ${{ github.event.issue.number }}
           body: |
             Link to `CU-${{ steps.link-task.outputs.TASK_ID }}`
