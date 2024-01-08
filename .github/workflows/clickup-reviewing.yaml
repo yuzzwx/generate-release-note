@@ -60,7 +60,7 @@ jobs:
           echo ::set-output name=UPDATED_TASK_IDS::$UPDATED_TASK_IDS
 
       - name: Find previous comment
-        uses: peter-evans/find-comment@v1
+        uses: peter-evans/find-comment@v2
         id: find-comment
         with:
           issue-number: ${{ github.event.issue.number }}
