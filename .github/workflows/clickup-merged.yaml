@@ -1,0 +1,77 @@
+on:
+  pull_request:
+    types: [ closed ]
+
+env:
+  TARGET_STATUS: 'COMPLETED'
+  CLICKUP_TOKEN: ${{ secrets.CLICKUP_TOKEN }}
+
+jobs:
+  clickup-merged:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v4
+
+      # get tasks from bot comment
+      - name: Get tasks from bot comment
+        id: get-tasks-from-bot-comment
+
+
+      - name: Parse task id from branch name
+        if: github.event_name == 'pull_request'
+        id: task-id-from-branch
+        run: |
+          BRANCH_NAME=${{ github.event.pull_request.head.ref }}
+          TASK_ID=$(python script/parse_task_id.py $BRANCH_NAME)
+          
+          echo ::set-output name=TASK_ID::$TASK_ID
+
+      - name: Parse task id from comment
+        id: task-id-from-comment
+        if: ${{ startsWith(github.event.comment.body, '/link') }}
+        run: |
+          TASK_IDS_IN_RAW=$(echo ${{ github.event.comment.body }} | sed 's/\/link //g')
+          TASK_IDS=$(python script/parse_task_id.py $TASK_IDS_IN_RAW)
+          
+          echo ::set-output name=TASK_IDS::$TASK_IDS
+
+      - name: Update task status
+        id: update-task-status
+        run: |
+          TASK_ID_FROM_BRANCH="${{ steps.task-id-from-branch.outputs.TASK_ID }}"
+          TASK_IDS_FROM_COMMENT="${{ steps.task-id-from-comment.outputs.TASK_IDS }}"
+          UPDATED_TASK_IDS=$(python script/update_task_status.py $TARGET_STATUS $TASK_ID_FROM_BRANCH $TASK_IDS_FROM_COMMENT)
+          
+          echo ::set-output name=UPDATED_TASK_IDS::$UPDATED_TASK_IDS
+
+#      - name: Find previous comment
+#        uses: peter-evans/find-comment@v1
+#        id: find-comment
+#        with:
+#          issue-number: ${{ github.event.issue.number }}
+#          comment-author: 'github-actions[bot]'
+#
+#      - name: Remove previous comment
+#        if: steps.find-comment.outputs.comment-id != ''
+#        uses: peter-evans/delete-comment@v1
+#        with:
+#          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+
+      - name: Create comment
+        id: create-comment
+        run: |
+          RESULT=$(python script/list_tasks_in_md.py ${{ steps.update-task-status.outputs.UPDATED_TASK_IDS }})
+          echo ::set-output name=RESULT::$RESULT
+
+      - name: Comment on PR
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          issue-number: ${{ github.event.pull_request.number || github.event.issue.number }}
+          body: |
+            The following tasks are updated to `${{ env.TARGET_STATUS }}`:
+            ${{ steps.create-comment.outputs.RESULT }}

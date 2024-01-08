@@ -5,7 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3fc68213-664b-4169-9e74-4f7c89c97ae3" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/script/list_tasks_in_md.py" beforeDir="false" afterPath="$PROJECT_DIR$/script/list_tasks_in_md.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.github/workflows/clickup-reviewing.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.github/workflows/click-up-sync.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/clickup-merged.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/script/parse_bot_comment.py" beforeDir="false" afterPath="$PROJECT_DIR$/script/parse_bot_comment.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/script/update_task_status.py" beforeDir="false" afterPath="$PROJECT_DIR$/script/update_task_status.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -21,7 +25,8 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    "git-widget-placeholder": "main"
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "/Users/yuji/Documents/generate-release-note/.github/workflows"
   },
   "keyToStringList": {
     "com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File": [
@@ -29,6 +34,11 @@
     ]
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/.github/workflows" />
+    </key>
+  </component>
   <component name="TaskManager">
     <servers />
   </component>

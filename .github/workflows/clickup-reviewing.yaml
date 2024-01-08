@@ -5,12 +5,16 @@ on:
     types: [ created, edited ]
 
 # TODO check all criteria
+# target branch
+# not a draft
+# labeled with 'will-release'
+
 env:
   TARGET_STATUS: 'ON-HOLD'
   CLICKUP_TOKEN: ${{ secrets.CLICKUP_TOKEN }}
 
 jobs:
-  click-up-sync:
+  clickup-reviewing:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -37,6 +41,15 @@ jobs:
           
           echo ::set-output name=TASK_IDS::$TASK_IDS
 
+      # TODO parse from commit message
+
+      - name: React comment as seen
+        if: ${{ steps.task-id-from-comment.outputs.TASK_IDS != '' }}
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          comment-id: ${{ github.event.comment.id }}
+          reactions: eyes
+
       - name: Update task status
         id: update-task-status
         run: |
@@ -46,12 +59,12 @@ jobs:
           
           echo ::set-output name=UPDATED_TASK_IDS::$UPDATED_TASK_IDS
 
-#      - name: Find previous comment
-#        uses: peter-evans/find-comment@v1
-#        id: find-comment
-#        with:
-#          issue-number: ${{ github.event.issue.number }}
-#          comment-author: 'github-actions[bot]'
+      - name: Find previous comment
+        uses: peter-evans/find-comment@v1
+        id: find-comment
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          comment-author: 'github-actions[bot]'
 #
 #      - name: Remove previous comment
 #        if: steps.find-comment.outputs.comment-id != ''
@@ -66,9 +79,19 @@ jobs:
           echo ::set-output name=RESULT::$RESULT
 
       - name: Comment on PR
+        if: ${{ steps.find-comment.outputs.comment-id == '' }}
         uses: peter-evans/create-or-update-comment@v3
         with:
           issue-number: ${{ github.event.pull_request.number || github.event.issue.number }}
           body: |
-            The following tasks are updated to `${{ env.TARGET_STATUS }}`:
+            Linked tasks:
+            ${{ steps.create-comment.outputs.RESULT }}
+
+      - name: Update comment
+        if: ${{ steps.find-comment.outputs.comment-id != '' }}
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          body: |
+            Linked tasks:
             ${{ steps.create-comment.outputs.RESULT }}
