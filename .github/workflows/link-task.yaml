@@ -14,21 +14,25 @@ jobs:
 
       - uses: actions/setup-python@v4
 
-      # merge
       - name: Link task from branch name
         id: link-task
         if: github.event_name == 'pull_request'
         run: |
-          TASK_ID=$(python script/parse_task_id.py ${{ github.event.pull_request.head.ref }})
-          echo TASK_ID=$TASK_ID >> $GITHUB_OUTPUT
-
-      - name: Link task from comment
-        id: parse-comment
-        if: github.event_name == 'issue_comment' && github.event.issue.pull_request
-        run: |
-          TASK_ID=$(python script/parse_task_id.py ${{ github.event.comment.body }})
-          echo TASK_ID=$TASK_ID >> $GITHUB_OUTPUT
-      # merge
+          BRANCH_NAME=${{ github.event.pull_request.head.ref }}
+          COMMENT_BODY=${{ github.event.comment.body }}
+          if [ $BRANCH_NAME ]; then
+              TASK_ID=$(python script/parse_task_id.py $BRANCH_NAME)
+          elif [ $COMMENT_BODY ]; then
+              TASK_ID=$(python script/parse_task_id.py $COMMENT_BODY)
+          fi
+          
+          if [ $TASK_ID ]; then
+              echo "Found task ID $TASK_ID in branch name"
+              echo "::set-output name=TASK_ID::$TASK_ID"
+          else
+              echo "No task ID found in branch name"
+              exit 1
+          fi
 
       - name: Comment task ID on PR
         uses: peter-evans/create-or-update-comment@v3
