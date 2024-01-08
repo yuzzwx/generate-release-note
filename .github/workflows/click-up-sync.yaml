@@ -1,6 +1,6 @@
 on:
-  pull_request:
-    types: [ edited ]
+  issue_comment:
+    types: [ created, edited ]
 
 jobs:
   click-up-sync:
@@ -10,7 +10,7 @@ jobs:
         id: bot
         with:
           issue-number: ${{ github.event.number }}
-          body-includes: "<!-- GH BOT -->"
+          comment-author: 'github-actions[bot]'
 
       - name: Parse task ID from comment
         id: parse-task-id
