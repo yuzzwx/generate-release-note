@@ -14,8 +14,7 @@ def main():
         if task:
             tasks.append(task)
 
-    for task in tasks:
-        print(f"[{task['name']}]({task['url']})")
+    print("<br>".join([f"[{task['name']}]({task['url']})" for task in tasks]))
 
 
 if __name__ == "__main__":
