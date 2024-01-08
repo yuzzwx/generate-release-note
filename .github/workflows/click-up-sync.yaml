@@ -7,6 +7,7 @@ on:
 # TODO check all criteria
 env:
   TARGET_STATUS: 'ON-HOLD'
+  CLICKUP_TOKEN: ${{ secrets.CLICKUP_TOKEN }}
 
 jobs:
   click-up-sync:
@@ -38,8 +39,6 @@ jobs:
 
       - name: Update task status
         id: update-task-status
-        env:
-          CLICKUP_TOKEN: ${{ secrets.CLICKUP_TOKEN }}
         run: |
           TASK_ID_FROM_BRANCH="${{ steps.task-id-from-branch.outputs.TASK_ID }}"
           TASK_IDS_FROM_COMMENT="${{ steps.task-id-from-comment.outputs.TASK_IDS }}"
