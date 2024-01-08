@@ -1,6 +1,8 @@
 on:
   pull_request:
     types: [ opened, synchronize ]
+  issue_comment:
+    types: [ created, edited ]
 
 jobs:
   link-task:
@@ -14,8 +16,16 @@ jobs:
 
       - name: Link task from branch name
         id: link-task
+        if: github.event_name == 'pull_request'
         run: |
           TASK_ID=$(python script/parse_task_id.py ${{ github.event.pull_request.head.ref }})
+          echo TASK_ID=$TASK_ID >> $GITHUB_OUTPUT
+
+      - name: Link task from comment
+        id: parse-comment
+        if: github.event_name == 'issue_comment' && github.event.issue.pull_request
+        run: |
+          TASK_ID=$(python script/parse_task_id.py ${{ github.event.comment.body }})
           echo TASK_ID=$TASK_ID >> $GITHUB_OUTPUT
 
       - name: Comment task ID on PR
@@ -23,4 +33,4 @@ jobs:
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body: |
-            Link to: CU-${{ steps.link-task.outputs.TASK_ID }}
+            Link to `CU-${{ steps.link-task.outputs.TASK_ID }}`
