@@ -16,7 +16,6 @@ jobs:
 
       - name: Link task from branch name
         id: link-task
-        if: github.event_name == 'pull_request'
         run: |
           TASK_ID=$(python script/parse_task_id.py ${{ github.event.pull_request.head.ref }})
           echo TASK_ID=$TASK_ID >> $GITHUB_OUTPUT
