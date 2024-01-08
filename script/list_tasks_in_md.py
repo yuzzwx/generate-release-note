@@ -15,7 +15,7 @@ def main():
             tasks.append(task)
 
     for task in tasks:
-        print(f"- [{task['name']}]({task['url']})")
+        print(f"- [{task['name']}]({task['url']})\n")
 
 
 if __name__ == "__main__":
