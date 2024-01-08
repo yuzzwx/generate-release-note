@@ -5,7 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3fc68213-664b-4169-9e74-4f7c89c97ae3" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.github/workflows/link-task.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/link-task.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.github/workflows/click-up-sync.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/click-up-sync.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -13,11 +13,18 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "git-widget-placeholder": "CU-86enbg262__Test-card-for-release-note-auto-generation"
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;git-widget-placeholder&quot;: &quot;CU-86enbg262__Test-card-for-release-note-auto-generation&quot;
   }
-}]]></component>
+}</component>
   <component name="TaskManager">
     <servers />
   </component>

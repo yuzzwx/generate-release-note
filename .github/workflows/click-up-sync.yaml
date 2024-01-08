@@ -1,0 +1,36 @@
+on:
+  issue_comment:
+    types: [ created ]
+
+jobs:
+  click-up-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Parse task ID from comment
+        id: parse-task-id
+        if: github.actor == 'github-actions[bot]'
+        run: |
+          COMMENT_BODY=${{ github.event.comment.body }}
+          TASK_IDS=$(python script/parse_bot_comment.py $COMMENT_BODY)
+          if [ $TASK_IDS ]; then
+              echo "Found task ID $TASK_IDS in comment"
+              echo "::set-output name=TASK_IDS::$TASK_IDS"
+          else
+              echo "No task ID found in comment"
+              exit 0
+          fi
+
+      - name: Sync task status
+        run: |
+          TASK_IDS=${{ steps.parse-task-id.outputs.TASK_IDS }}
+          
+          while IFS= read -r task; do
+              curl -i -X PUT \
+              "https://api.clickup.com/api/v2/task/$task" \
+              -H "Authorization: $CLICKUP_TOKEN" \
+              -H 'Content-Type: application/json' \
+              -d '{ "status": "ON-HOLD" }'
+          done <<< "$TASK_IDS"
+
+        env:
+          CLICKUP_TOKEN: ${{ secrets.CLICKUP_TOKEN }}
