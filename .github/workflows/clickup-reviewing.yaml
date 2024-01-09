@@ -37,7 +37,7 @@ jobs:
 
   clickup-reviewing:
     needs: check-criteria
-    if: ${{ needs.check-criteria.outputs.IS_CRITERIA_MET }}
+    if: ${{ needs.check-criteria.outputs.IS_CRITERIA_MET == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
