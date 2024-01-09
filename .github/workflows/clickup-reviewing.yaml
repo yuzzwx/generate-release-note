@@ -9,11 +9,34 @@ env:
   CLICKUP_TOKEN: ${{ secrets.CLICKUP_TOKEN }}
 
 jobs:
+  check-criteria:
+    runs-on: ubuntu-latest
+    outputs:
+      IS_CRITERIA_MET: ${{ steps.check-criteria.outputs.IS_CRITERIA_MET }}
+    steps:
+      # not a draft
+      # target branch is dev
+      # has label 'will-release'
+      - name: Check criteria
+        id: check-criteria
+        run: |
+          echo ::set-output name=IS_CRITERIA_MET::true
+
+          if [ ${{ github.event.issue.draft }} == true ]; then
+            echo ::set-output name=IS_CRITERIA_MET::false
+          fi
+
+          BASE_REF=$(gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }} | jq -r '.base.ref')
+          if [  BASE_REF != 'dev' ]; then
+            echo ::set-output name=IS_CRITERIA_MET::false
+          fi
+
+          if [ $(echo ${{ github.event.issue.labels.*.name }} | grep -c 'will-release') == 0 ]; then
+            echo ::set-output name=IS_CRITERIA_MET::false
+          fi
+
   clickup-reviewing:
-    # not a draft
-    # target branch is dev
-    # has label 'will-release'
-    if: ${{ github.event.issue.draft == false && github.base_ref == 'dev' && contains(github.event.issue.labels.*.name, 'will-release') }}
+    if: ${{ jobs.check-criteria.outputs.IS_CRITERIA_MET }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
