@@ -10,7 +10,10 @@ env:
 
 jobs:
   clickup-reviewing:
-    if: ${{ github.event.issue.draft == false && github.base_ref == 'main' && contains(github.event.issue.labels.*.name, 'will-release') }}
+    # not a draft
+    # target branch is dev
+    # has label 'will-release'
+    if: ${{ github.event.issue.draft == false && github.base_ref == 'dev' && contains(github.event.issue.labels.*.name, 'will-release') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
