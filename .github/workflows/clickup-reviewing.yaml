@@ -6,22 +6,22 @@ on:
 
 env:
   PR_NUM: ${{ github.event.pull_request.number || github.event.issue.number }}
-  TARGET_STATUS: 'ON-HOLD' # For demo
-  CLICKUP_TOKEN: ${{ secrets.CLICKUP_TOKEN }}
 
 jobs:
   check-criteria:
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TARGET_BRANCH: 'dev'
+      REQUIRED_LABEL: 'will-release'
     outputs:
       IS_CRITERIA_MET: ${{ steps.check-criteria.outputs.IS_CRITERIA_MET }}
     steps:
       # not a draft
-      # target branch is dev
-      # has label 'will-release'
+      # target branch matches
+      # label matches
       - name: Check criteria
         id: check-criteria
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           echo ::set-output name=IS_CRITERIA_MET::true
 
@@ -31,21 +31,24 @@ jobs:
           fi
 
           BASE_REF=$(gh api repos/${{ github.repository }}/pulls/${{ env.PR_NUM }} | jq -r '.base.ref')
-          if [ $BASE_REF != 'dev' ]; then
+          if [ $BASE_REF != $TARGET_BRANCH ]; then
             echo ::set-output name=IS_CRITERIA_MET::false
-            echo 'Not targeting dev'
+            echo 'Not targeting $TARGET_BRANCH'
           fi
 
           LABELS=$(gh api repos/${{ github.repository }}/pulls/${{ env.PR_NUM }} | jq -r '.labels[].name')
-          if [[ ! $LABELS =~ 'will-release' ]]; then
+          if [[ ! $LABELS =~ $REQUIRED_LABEL ]]; then
             echo ::set-output name=IS_CRITERIA_MET::false
-            echo 'Not labeled with will-release'
+            echo 'Not labeled with $REQUIRED_LABEL'
           fi
 
   clickup-reviewing:
     needs: check-criteria
     if: ${{ needs.check-criteria.outputs.IS_CRITERIA_MET == 'true' }}
     runs-on: ubuntu-latest
+    env:
+      TARGET_STATUS: 'ON-HOLD' # For demo
+      CLICKUP_TOKEN: ${{ secrets.CLICKUP_TOKEN }}
     steps:
       - uses: actions/checkout@v3
         with:
