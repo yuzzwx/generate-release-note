@@ -1,11 +1,12 @@
 on:
   pull_request:
-    types: [ opened, synchronize, labeled ]
+    types: [ opened, synchronize, edited, labeled ]
   issue_comment:
     types: [ created, edited ]
 
 env:
-  TARGET_STATUS: 'ON-HOLD'
+  PR_NUM: ${{ github.event.pull_request.number || github.event.issue.number }}
+  TARGET_STATUS: 'ON-HOLD' # For demo
   CLICKUP_TOKEN: ${{ secrets.CLICKUP_TOKEN }}
 
 jobs:
@@ -29,13 +30,13 @@ jobs:
             echo 'Draft PR'
           fi
 
-          BASE_REF=$(gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }} | jq -r '.base.ref')
+          BASE_REF=$(gh api repos/${{ github.repository }}/pulls/${{ env.PR_NUM }} | jq -r '.base.ref')
           if [ $BASE_REF != 'dev' ]; then
             echo ::set-output name=IS_CRITERIA_MET::false
             echo 'Not targeting dev'
           fi
-          
-          LABELS=$(gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }} | jq -r '.labels[].name')
+
+          LABELS=$(gh api repos/${{ github.repository }}/pulls/${{ env.PR_NUM }} | jq -r '.labels[].name')
           if [[ ! $LABELS =~ 'will-release' ]]; then
             echo ::set-output name=IS_CRITERIA_MET::false
             echo 'Not labeled with will-release'
@@ -70,8 +71,6 @@ jobs:
           
           echo ::set-output name=TASK_IDS::$TASK_IDS
 
-      # TODO parse from commit message
-
       - name: React comment as seen
         if: ${{ steps.task-id-from-comment.outputs.TASK_IDS != '' }}
         uses: peter-evans/create-or-update-comment@v3
@@ -91,22 +90,22 @@ jobs:
       - name: Find previous comment
         uses: peter-evans/find-comment@v2
         id: find-comment
-        continue-on-error: true
         with:
-          issue-number: ${{ github.event.pull_request.number || github.event.issue.number }}
+          issue-number: ${{ env.PR_NUM }}
           comment-author: 'github-actions[bot]'
 
-      - name: Create comment
+      - name: Compose comment
         id: create-comment
         run: |
           RESULT=$(python script/list_tasks_in_md.py ${{ steps.update-task-status.outputs.UPDATED_TASK_IDS }})
           echo ::set-output name=RESULT::$RESULT
+        continue-on-error: true
 
-      - name: Comment on PR
+      - name: Create comment
         if: ${{ steps.find-comment.outputs.comment-id == '' }}
         uses: peter-evans/create-or-update-comment@v3
         with:
-          issue-number: ${{ github.event.pull_request.number || github.event.issue.number }}
+          issue-number: ${{ env.PR_NUM }}
           body: |
             Linked tasks:
             ${{ steps.create-comment.outputs.RESULT }}
