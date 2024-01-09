@@ -4,19 +4,16 @@ on:
   issue_comment:
     types: [ created, edited ]
 
-# TODO check all criteria
-# target branch
-# not a draft
-# labeled with 'will-release'
-
 env:
   TARGET_STATUS: 'ON-HOLD'
   CLICKUP_TOKEN: ${{ secrets.CLICKUP_TOKEN }}
-  REQUIRED_LABEL: 'will-release'
 
 jobs:
   clickup-reviewing:
-    if: ${{  github.event.issue.draft == false && contains(github.event.issue.labels.*.name, env.REQUIRED_LABEL) }}
+    if: ${{ github.event.issue.draft == false &&
+      github.base_ref == 'main' &&
+      contains(github.event.issue.labels.*.name, 'will-release')
+    }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
