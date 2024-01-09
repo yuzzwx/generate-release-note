@@ -34,7 +34,7 @@ jobs:
             echo ::set-output name=IS_CRITERIA_MET::false
             echo 'Not targeting dev'
           fi
-          echo ${{ github.event.issue.labels.*.name }}
+          echo ${{ join(github.event.issue.labels.*.name, ',') }}
           if [ ${{ contains(github.event.issue.labels.*.name, 'will-release') != 'true' }} ]; then
             echo ::set-output name=IS_CRITERIA_MET::false
             echo 'Not labeled with will-release'
