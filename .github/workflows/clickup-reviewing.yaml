@@ -35,7 +35,7 @@ jobs:
             echo 'Not targeting dev'
           fi
           
-          LABELS=$(gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/labels | jq -r '.[].name')
+          LABELS=$(gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }} | jq -r '.labels[].name')
           if [[ ! $LABELS =~ 'will-release' ]]; then
             echo ::set-output name=IS_CRITERIA_MET::false
             echo 'Not labeled with will-release'
