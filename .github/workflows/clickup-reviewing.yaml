@@ -31,7 +31,7 @@ jobs:
             echo ::set-output name=IS_CRITERIA_MET::false
           fi
 
-          if [ $(echo ${{ github.event.issue.labels.*.name }} | grep -c 'will-release') == 0 ]; then
+          if [ ${{ !contains(github.event.issue.labels.*.name, 'will-release') }} ]; then
             echo ::set-output name=IS_CRITERIA_MET::false
           fi
 
