@@ -1,9 +1,10 @@
 import argparse
+import re
 
 
 def parse_clickup_task_id(task_str: str) -> str:
     if task_str.startswith("CU-"):
-        task_id = task_str[3:]
+        task_id = re.split('[-_]', task_str)[1]
         return task_id
     elif task_str.startswith("https://app.clickup.com/t/"):
         task_id = task_str.split("/")[-1]
@@ -17,7 +18,8 @@ def main():
     parser.add_argument(
         "task_ids",
         nargs="+",
-        help="The task ids in the form of CU-<task-id>, <task-id> or https://app.clickup.com/t/<task-id>"
+        help="The task ids in the form of CU-<task-id>, <task-id>, https://app.clickup.com/t/<task-id> or "
+             "clickup generated branch name"
     )
 
     args = parser.parse_args()

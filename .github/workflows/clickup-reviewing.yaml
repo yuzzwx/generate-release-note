@@ -15,6 +15,7 @@ env:
 
 jobs:
   clickup-reviewing:
+    if: ${{  github.event.issue.draft == false && contains(github.event.issue.labels.*.name, 'will-release') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -65,12 +66,6 @@ jobs:
         with:
           issue-number: ${{ github.event.issue.number }}
           comment-author: 'github-actions[bot]'
-#
-#      - name: Remove previous comment
-#        if: steps.find-comment.outputs.comment-id != ''
-#        uses: peter-evans/delete-comment@v1
-#        with:
-#          comment-id: ${{ steps.find-comment.outputs.comment-id }}
 
       - name: Create comment
         id: create-comment
