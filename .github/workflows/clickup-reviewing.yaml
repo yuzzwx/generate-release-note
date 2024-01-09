@@ -10,10 +10,7 @@ env:
 
 jobs:
   clickup-reviewing:
-    if: ${{ github.event.issue.draft == false &&
-      github.base_ref == 'main' &&
-      contains(github.event.issue.labels.*.name, 'will-release')
-    }}
+    if: ${{ github.event.issue.draft == false && github.base_ref == 'main' && contains(github.event.issue.labels.*.name, 'will-release') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
