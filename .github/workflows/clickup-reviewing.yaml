@@ -24,15 +24,18 @@ jobs:
 
           if [ ${{ github.event.issue.draft }} == true ]; then
             echo ::set-output name=IS_CRITERIA_MET::false
+            echo 'Draft PR'
           fi
 
           BASE_REF=$(gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }} | jq -r '.base.ref')
           if [  BASE_REF != 'dev' ]; then
             echo ::set-output name=IS_CRITERIA_MET::false
+            echo 'Not targeting dev'
           fi
 
           if [ ${{ !contains(github.event.issue.labels.*.name, 'will-release') }} ]; then
             echo ::set-output name=IS_CRITERIA_MET::false
+            echo 'Not labeled with will-release'
           fi
 
   clickup-reviewing:
